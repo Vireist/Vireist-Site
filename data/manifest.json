@@ -1,0 +1,16 @@
+{
+  "games": [
+    "data/games/001-worlds-gone-beautiful.md",
+    "data/games/002-backup.md",
+    "data/games/003-uroboros.md",
+    "data/games/004-motel.md",
+    "data/games/005-may-24th.md",
+    "data/games/006-irreality.md"
+  ],
+  "reviews": [
+    "data/reviews/Mister Y (1).md",
+    "data/reviews/Mister Y (2).md",
+    "data/reviews/Mister Y (3).md",
+    "data/reviews/anonymous (1).md"
+  ]
+}

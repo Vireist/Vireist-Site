@@ -1,0 +1,5 @@
+[
+  {"icon": "telegram", "title": "Telegram", "handle": "@vireist", "url": "https://t.me/vireist", "note": "самый быстрый способ связаться", "preferred": "Самый быстрый"},
+  {"icon": "mail", "title": "Почта", "handle": "vireist@proton.me", "url": "mailto:vireist@proton.me", "note": "для договорённостей и предложений"},
+  {"icon": "discord", "title": "Discord", "handle": "vireist", "url": "https://discord.gg/vireist", "note": "голос, внеигровые разговоры. Возможна задержка ответа!"}
+]
