@@ -281,7 +281,7 @@ function renderGame(id){
     }
     const m=g.meta, paid=(m.price||'').toLowerCase()==='платно';
     view.innerHTML = `<div class="container game-doc">
-    <a class="back" href="#/">← В картотеку</a>
+    <a class="back" href="#/" data-section="games">← В картотеку</a>
     <div class="doc-head"><span class="case-num">Дело № ${esc(m.id)}</span>
       <span class="price ${paid?'paid':'free'}">${esc(m.price||'')}</span></div>
     <h2 class="doc-title">${esc(m.title)}</h2>
