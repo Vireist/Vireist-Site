@@ -269,4 +269,14 @@ html[data-theme="light"] .polaroid{background:#fbf9f2}
     border:1px solid var(--teal);outline:1px solid var(--teal);outline-offset:2px;
     padding:3px 9px;transform:rotate(2deg);
 }
-.section-note{text-wrap:pretty}
+.section-note{text-wrap:balance}
+
+/* ============ ОТЗЫВЫ: ПОСТЕПЕННОЕ РАСКРЫТИЕ ============ */
+.sec-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:32px}
+.sec-count-foot{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+.rev-grid .rev-card{transition:opacity .4s ease, transform .4s ease}
+.rev-grid .rev-card.rev-enter{animation:rev-in .5s ease backwards}
+.rev-grid .rev-card:hover{transform:translateY(0) rotate(0deg)}
+@keyframes rev-in{
+    from{opacity:0;transform:translateY(12px) rotate(var(--rot,0deg));}
+}

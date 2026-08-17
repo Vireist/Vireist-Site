@@ -43,13 +43,16 @@ function parseFrontmatter(src){
 }
 
 const state = { config:{}, games:[], reviews:[], contacts:[], about:'',
-    filters:{q:'', system:'', format:'', genre:'', price:''} };
+    filters:{q:'', system:'', format:'', genre:'', price:''},
+    revShown: 6, revPageSize: 6 };
 
 /* ============ СТАРТ ============ */
 (async function boot(){
     initTheme();
     try{
         state.config   = await getJSON('data/config.json');
+        state.revPageSize = Number(state.config.reviewsPageSize) || 6;
+        state.revShown    = state.revPageSize;
         const manifest = await getJSON('data/manifest.json');
         state.contacts = await getJSON('data/contacts.json');
         const loadDoc = f => getText(f).then(parseFrontmatter).catch(e=>{ console.warn('Не читается:', f, e); return null; });
@@ -256,13 +259,45 @@ function renderRecruits(){
 }
 /* ============ ОТЗЫВЫ / КОНТАКТЫ ============ */
 function renderReviews(){
-    $('#reviews-list').innerHTML = state.reviews.map((r,i)=>`
-    <figure class="rev-card" style="--rot:${i%2 ? '1.3deg' : '-1.6deg'}">
-      ${mdToHtml(r.body)}
-      <figcaption><span class="rev-name">${esc(r.meta.name||'Аноним')}</span>
-      <span class="rev-game">${esc(r.meta.game||'')}</span></figcaption>
-    </figure>`).join('');
-}
+    const reviews = state.reviews || [];
+    const total = reviews.length;
+    const shown = Math.min(state.revShown, total);
+    const slice = reviews.slice(0, shown);
+
+    $('#reviews-list').innerHTML = slice.map((r,i)=>`
+        <figure class="rev-card" style="--rot:${i%2 ? '1.3deg' : '-1.6deg'}">
+          ${mdToHtml(r.body)}
+          <figcaption><span class="rev-name">${esc(r.meta.name||'Аноним')}</span>
+          <span class="rev-game">${esc(r.meta.game||'')}</span></figcaption>
+        </figure>`).join('');
+
+    $('#reviews-count').textContent = total ? `показано ${shown} из ${total}` : '';
+
+    // Анимация появления только что пришедших карточек
+    $$('#reviews-list .rev-card').forEach((el,i)=>{
+        if(i >= shown - Math.min(6, Math.max(state.revPageSize, 1))){
+            el.classList.add('rev-enter');
+        }
+    });
+
+    const foot = $('#reviews-foot');
+    if(!foot) return;
+    if(total <= state.revPageSize){ foot.hidden = true; return; }
+    foot.hidden = false;
+
+    const allShown = shown === total;
+    foot.innerHTML = allShown
+        ? `<button class="btn ghost" id="rev-fold">Скрыть</button>
+           <span class="sec-count-foot">распечатано ${total} показаний</span>`
+        : `<button class="btn" id="rev-more">Запросить ещё · +${Math.min(state.revPageSize, total-shown)}</button>
+           <button class="btn ghost" id="rev-all">Показать все ${total}</button>`;
+
+    const more = $('#rev-more');
+    const btnAll = $('#rev-all');
+    const fold = $('#rev-fold');
+    if(more) more.onclick = ()=>{ state.revShown = Math.min(total, state.revShown + state.revPageSize); renderReviews(); };
+    if(btnAll) btnAll.onclick = ()=>{ state.revShown = total; renderReviews(); };
+    if(fold) fold.onclick = ()=>{ state.revShown = state.revPageSize; renderReviews(); window.scrollTo({top: document.getElementById('reviews').offsetTop - 60, behavior:'smooth'}); };}
 const ICONS = {
     telegram:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>',
     mail:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="1"/><path d="m2 7 10 7L22 7"/></svg>',
