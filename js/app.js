@@ -108,7 +108,9 @@ function setTheme(t, silent){
 /* ============ СТАТИКА ИЗ КОНФИГА ============ */
 function buildStatic(){
     const c = state.config;
-    document.title = (c.nick||'Vireist') + ' — досье мастера';
+    const nick = c.nick || 'Vireist';
+    const name = c.name || '';
+    document.title = (name ? name + ' «' + nick + '» — ' : nick + ' — ') + 'досье мастера: НРИ, хоррор и драма';
     $('#logo-nick').textContent = (c.nick||'VIREIST').toUpperCase();
     $('#hero-overline').textContent = c.overline || '';
     $('#hero-name').innerHTML = esc(c.name||'') + ' <span class="accent">«' + esc(c.nick||'') + '»</span>';
