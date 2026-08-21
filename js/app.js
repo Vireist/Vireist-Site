@@ -473,3 +473,16 @@ document.addEventListener('click', e=>{
         body.animate([{height:'0px'},{height:h+'px'}], {duration:260, easing:'ease-out'});
     }
 });
+
+/* ============ МОБИЛЬНОЕ МЕНЮ ============ */
+(function(){
+    const drawer=$('#nav-drawer'), backdrop=$('#nav-backdrop');
+    $('#nav-drawer-list').innerHTML = $('#main-nav').innerHTML; // ссылки не дублируются вручную
+    const open =()=>{ drawer.classList.add('open'); backdrop.classList.add('open'); document.body.classList.add('no-scroll'); drawer.setAttribute('aria-hidden','false'); };
+    const close=()=>{ drawer.classList.remove('open'); backdrop.classList.remove('open'); document.body.classList.remove('no-scroll'); drawer.setAttribute('aria-hidden','true'); };
+    $('#nav-open').addEventListener('click', open);
+    $('#nav-close').addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+    drawer.addEventListener('click', e=>{ if(e.target.closest('a')) close(); });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+})();
