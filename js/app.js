@@ -271,7 +271,7 @@ function caseCard(g){
       <h3>${esc(m.title)}</h3>
       <p>${esc(m.teaser||'')}</p>
             <div class="meta"><span class="sys">${esc(m.system)}</span> · ${esc(m.format)} · ${esc(m.players)} · ${esc(m.duration)}${m.geo ? ' · <span class="geo">'+esc(m.geo)+'</span>' : ''}</div>
-      <div class="tags">${(m.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+            <div class="tags">${m.setting ? `<span class="tag tag-setting">${esc(m.setting)}</span>` : ''}${(m.tags||[]).filter(t=>t.toLowerCase()!==String(m.setting||'').toLowerCase()).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
     </div></article>`;
 }
 function renderCatalog(){
@@ -405,12 +405,13 @@ function renderGame(id){
     <h2 class="doc-title">${esc(m.title)}</h2>
     <p class="hero-text">${esc(m.teaser||'')}</p>
     <dl class="doc-meta">
-      <div><dt>Система</dt><dd class="t">${esc(m.system)}</dd></div>
+      <div class="meta-half"><dt>Система</dt><dd class="t">${esc(m.system)}</dd></div>
+      <div class="meta-half"><dt>Вселенная</dt><dd class="t">${esc(m.setting||'—')}</dd></div>
       <div><dt>Формат</dt><dd>${esc(m.format)}</dd></div>
       <div><dt>Игроки</dt><dd>${esc(m.players)}</dd></div>
       <div><dt>Длительность</dt><dd>${esc(m.duration)}</dd></div>
       <div><dt>Стоимость</dt><dd>${esc(m.price)}</dd></div>
-      ${m.geo ? `<div><dt>География</dt><dd class="t">${esc(m.geo)}</dd></div>` : ''}
+      ${m.geo ? `<div class="meta-full"><dt>География</dt><dd class="t">${esc(m.geo)}</dd></div>` : ''}
     </dl>
     ${coverHtml(m,'doc-cover')}
     <div class="doc-body">${mdToHtml(g.body)}</div>
