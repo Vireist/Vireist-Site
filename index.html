@@ -29,7 +29,7 @@
     <span class="logo-v">V</span>
     <span class="logo-text"><strong id="logo-nick">VIREIST</strong><small>досье мастера</small></span>
   </a>
-  <nav class="nav">
+  <nav class="nav" id="main-nav">
     <a href="#/" data-section="games">Игры</a>
     <a href="#/" data-section="recruits">Наборы</a>
     <a href="#/" data-section="about">Обо мне</a>
@@ -37,8 +37,11 @@
     <a href="#/" data-section="reviews">Отзывы</a>
     <a href="#/" data-section="faq">FAQ</a>
     <a href="#/" data-section="contacts">Контакты</a>
-    <button id="theme-btn" class="theme-btn" aria-label="Переключить тему">☀</button>
   </nav>
+  <div class="topbar-actions">
+    <button id="theme-btn" class="theme-btn" aria-label="Переключить тему">☀</button>
+    <button class="burger" id="nav-open" aria-label="Открыть меню"><span></span><span></span><span></span></button>
+  </div>
 </header>
 
 <main>
@@ -176,6 +179,15 @@
     <button class="btn" id="filters-apply">Показать дела</button>
     <button class="btn ghost" id="filters-reset">Сбросить</button>
   </div>
+</aside>
+
+<div class="drawer-backdrop" id="nav-backdrop"></div>
+<aside class="drawer nav-drawer" id="nav-drawer" aria-hidden="true" aria-label="Меню">
+  <div class="drawer-head">
+    <span class="drawer-title">Содержание</span>
+    <button class="drawer-close" id="nav-close" aria-label="Закрыть меню">×</button>
+  </div>
+  <nav class="nav-drawer-list" id="nav-drawer-list"></nav>
 </aside>
 
 <script src="js/app.js"></script>
