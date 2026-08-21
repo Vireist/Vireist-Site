@@ -43,7 +43,7 @@ function parseFrontmatter(src){
 }
 
 const state = { config:{}, games:[], reviews:[], contacts:[], about:'',
-    filters:{q:'', system:'', format:'', genre:'', price:''},
+    filters:{q:'', system:'', format:'', setting:'', tags:[], price:''},
     revShown: 6, revPageSize: 6 };
 
 /* ============ СТАРТ ============ */
@@ -56,20 +56,22 @@ const state = { config:{}, games:[], reviews:[], contacts:[], about:'',
         const manifest = await getJSON('data/manifest.json');
         state.contacts = await getJSON('data/contacts.json');
         const loadDoc = f => getText(f).then(parseFrontmatter).catch(e=>{ console.warn('Не читается:', f, e); return null; });
-        const [games, reviews, about, table, recruits] = await Promise.all([
+        const [games, reviews, about, table, recruits, faq] = await Promise.all([
             Promise.all(manifest.games.map(loadDoc)),
             Promise.all(manifest.reviews.map(loadDoc)),
             getText(state.config.aboutFile || 'data/about.md').catch(()=> ''),
             getJSON(state.config.tableFile || 'data/table.json').catch(()=> []),
-            getJSON(state.config.recruitsFile || 'data/recruits.json').catch(()=> [])
+            getJSON(state.config.recruitsFile || 'data/recruits.json').catch(()=> []),
+            getJSON(state.config.faqFile || 'data/faq.json').catch(()=> [])
         ]);
         state.recruits = recruits;
         state.games   = games.filter(Boolean).sort((a,b)=>String(a.meta.id).localeCompare(String(b.meta.id)));
         state.reviews = reviews.filter(Boolean);
         state.about   = about;
         state.table   = table;
-        buildStatic(); buildFilters();
-        renderCatalog(); renderReviews(); renderContacts(); renderRecruits(); renderTable();
+        state.faq = faq;
+        buildStatic(); buildFilters(); initFiltersDrawer();
+        renderCatalog(); renderReviews(); renderContacts(); renderRecruits(); renderTable(); renderFaq();
         $('#catalog').addEventListener('click', e=>{
             const card=e.target.closest('.case-card');
             if(card && !e.target.closest('button')) location.hash='#/game/'+encodeURIComponent(card.dataset.id);
@@ -143,6 +145,24 @@ function buildStatic(){
     $('#license-line').textContent = `Материалы публикуются под лицензией ${c.license||'CC BY-NC-SA 4.0'}: делитесь и адаптируйте для своих игр с указанием автора, без коммерческого использования.`;
     $('#year').textContent = new Date().getFullYear();
     $('#footer-nick').textContent = c.nick || 'Vireist';
+    $('#hero-geo').innerHTML = (c.geo||[]).map(g=>`<span class="geo-stamp">${esc(g)}</span>`).join('');
+    $('#hero-geo').style.display = (c.geo||[]).length ? '' : 'none';
+    const pn = $('#price-note'); pn.textContent = c.priceNote||''; pn.hidden = !c.priceNote;
+    const inc = $('#included');
+    inc.innerHTML = (c.includedText||c.included) ?
+        `<span class="incl-stamp">всё включено</span><p>${esc(c.includedText||'')}</p>
+   <div class="tags">${(c.included||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : '';
+    inc.hidden = !inc.innerHTML.trim();
+    const fl = $('#fan-line'); fl.textContent = c.fanDisclaimer||''; fl.hidden = !c.fanDisclaimer;
+    const rn=$('#reviews-note');
+    const notes=Array.isArray(c.reviewsNote)?c.reviewsNote:(c.reviewsNote?[c.reviewsNote]:[]);
+    rn.innerHTML=notes.map(t=>`<p class="section-note">${esc(t)}</p>`).join('');
+    rn.hidden=!notes.length;
+    const br=c.bugReport||{}, bl=$('#bug-line');
+    if(br.url){
+        bl.hidden=false;
+        bl.innerHTML=`${esc(br.text||'Нашли баг на сайте — напишите:')} <a href="${esc(br.url)}" target="_blank" rel="noopener">${esc(br.handle||br.url)}</a>`;
+    } else bl.hidden=true;
 }
 
 /* ============ ФИЛЬТРЫ ============ */
@@ -150,14 +170,56 @@ function buildFilters(){
     const uniq = k => [...new Set(state.games.map(g=>g.meta[k]||'').filter(Boolean))];
     makeChips('#f-system','system', uniq('system'));
     makeChips('#f-format','format', uniq('format'));
-    const genres = [...new Set(state.games.flatMap(g=>g.meta.tags||[]))].sort((a,b)=>a.localeCompare(b,'ru'));
-    $('#genre').insertAdjacentHTML('beforeend', genres.map(g=>`<option value="${esc(g.toLowerCase())}">${esc(g)}</option>`).join(''));
-    $('#genre').addEventListener('change', e=>{ state.filters.genre=e.target.value; renderCatalog(); });
+    makeChips('#f-setting','setting', uniq('setting'));
+    const tags = [...new Set(state.games.flatMap(g=>g.meta.tags||[]))].sort((a,b)=>a.localeCompare(b,'ru'));
+    makeTagChips('#f-tags', tags);
     $('#search').addEventListener('input', e=>{ state.filters.q=e.target.value.trim().toLowerCase(); renderCatalog(); });
     $('#f-price').addEventListener('click', e=>{
         const b=e.target.closest('.chip'); if(!b) return;
         chipSelect('#f-price', b); state.filters.price=b.dataset.price; renderCatalog();
     });
+}
+
+/* ============ ВЫДВИЖНАЯ ПАНЕЛЬ ФИЛЬТРОВ ============ */
+function initFiltersDrawer(){
+    const drawer=$('#filters-drawer'), backdrop=$('#filters-backdrop');
+    const open =()=>{ drawer.classList.add('open'); backdrop.classList.add('open'); document.body.classList.add('no-scroll'); drawer.setAttribute('aria-hidden','false'); };
+    const close=()=>{ drawer.classList.remove('open'); backdrop.classList.remove('open'); document.body.classList.remove('no-scroll'); drawer.setAttribute('aria-hidden','true'); };
+    $('#filters-open').addEventListener('click', open);
+    $('#filters-close').addEventListener('click', close);
+    $('#filters-apply').addEventListener('click', close);
+    $('#filters-reset').addEventListener('click', resetFilters);
+    backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+}
+
+/* теги: мультивыбор со сворачиванием */
+function makeTagChips(sel, values){
+    const el=$(sel);
+    el._values=values; el._expanded=false;
+    renderTagChips();
+    el.addEventListener('click', e=>{
+        const b=e.target.closest('.chip'); if(!b) return;
+        if(b.classList.contains('more')){ el._expanded=!el._expanded; renderTagChips(); return; }
+        const val=b.dataset.val, arr=state.filters.tags, i=arr.indexOf(val);
+        if(i>=0) arr.splice(i,1); else arr.push(val);
+        renderTagChips(); renderCatalog();
+    });
+}
+function renderTagChips(){
+    const el=$('#f-tags'); if(!el || !el._values) return;
+    const values=el._values, active=state.filters.tags;
+    const limit=Number(state.config.tagsCollapsed)||10;
+    let shown=values, hidden=0;
+    if(!el._expanded && values.length>limit){
+        const head=values.slice(0,limit);
+        const extra=values.slice(limit).filter(v=>active.includes(v.toLowerCase())); // выбранные не прячем
+        shown=head.concat(extra);
+        hidden=values.length-shown.length;
+    }
+    el.innerHTML = shown.map(v=>`<button class="chip${active.includes(v.toLowerCase())?' active':''}" data-val="${esc(v.toLowerCase())}">${esc(v)}</button>`).join('')
+        + (hidden>0 ? `<button class="chip more">ещё ${hidden}</button>` : '')
+        + (el._expanded && values.length>limit ? `<button class="chip more">свернуть</button>` : '');
 }
 function makeChips(sel, key, values){
     $(sel).innerHTML = `<button class="chip active" data-val="">Все</button>` +
@@ -169,9 +231,10 @@ function makeChips(sel, key, values){
 }
 function chipSelect(sel, btn){ $$(sel+' .chip').forEach(c=>c.classList.toggle('active', c===btn)); }
 function resetFilters(){
-    state.filters={q:'',system:'',format:'',genre:'',price:''};
-    $('#search').value=''; $('#genre').value='';
-    ['#f-system','#f-format','#f-price'].forEach(s=>chipSelect(s, $(s+' .chip')));
+    state.filters={q:'',system:'',format:'',setting:'',tags:[],price:''};
+    $('#search').value='';
+    ['#f-system','#f-format','#f-setting','#f-price'].forEach(s=>chipSelect(s, $(s+' .chip')));
+    renderTagChips();
     renderCatalog();
 }
 function filteredGames(){
@@ -181,7 +244,8 @@ function filteredGames(){
         if(f.q && !(m.title||'').toLowerCase().includes(f.q)) return false;
         if(f.system && (m.system||'').toLowerCase()!==f.system) return false;
         if(f.format && (m.format||'').toLowerCase()!==f.format) return false;
-        if(f.genre  && !(m.tags||[]).map(t=>t.toLowerCase()).includes(f.genre)) return false;
+        if(f.setting && (m.setting||'').toLowerCase()!==f.setting) return false;
+        if(f.tags.length && !f.tags.every(t=>(m.tags||[]).map(x=>x.toLowerCase()).includes(t))) return false;
         if(f.price  && (m.price||'').toLowerCase()!==f.price) return false;
         return true;
     });
@@ -206,13 +270,16 @@ function caseCard(g){
     <div class="case-body">
       <h3>${esc(m.title)}</h3>
       <p>${esc(m.teaser||'')}</p>
-      <div class="meta"><span class="sys">${esc(m.system)}</span> · ${esc(m.format)} · ${esc(m.players)} · ${esc(m.duration)}</div>
+            <div class="meta"><span class="sys">${esc(m.system)}</span> · ${esc(m.format)} · ${esc(m.players)} · ${esc(m.duration)}${m.geo ? ' · <span class="geo">'+esc(m.geo)+'</span>' : ''}</div>
       <div class="tags">${(m.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
     </div></article>`;
 }
 function renderCatalog(){
     const list=filteredGames();
     $('#count').textContent='Найдено дел: '+list.length;
+    const f=state.filters;
+    const n=(f.q?1:0)+(f.system?1:0)+(f.format?1:0)+(f.setting?1:0)+(f.price?1:0)+f.tags.length;
+    const fc=$('#filters-count'); fc.hidden=!n; fc.textContent=n;
     $('#catalog').innerHTML = list.length ? list.map(caseCard).join('') :
         `<div class="empty-state">По такому запросу дел нет — сбросьте фильтры.<br>
      <button class="btn ghost" id="reset-f">Сбросить</button></div>`;
@@ -236,6 +303,18 @@ function renderTable(){
         </div>`).join('')}
       </div></div>`;
     }).join('');
+}
+
+/* ============ FAQ ============ */
+/* ============ FAQ ============ */
+function renderFaq(){
+    const items = state.faq || [];
+    $('#faq').hidden = !items.length;
+    $('#faq-list').innerHTML = items.map(f=>`
+      <details class="faq-item">
+        <summary>${esc(f.q||'')}</summary>
+        <div class="faq-a"><div class="faq-a-in">${mdToHtml(f.a||'')}</div></div>
+      </details>`).join('');
 }
 
 /* ============ АКТИВНЫЕ НАБОРЫ ============ */
@@ -266,7 +345,9 @@ function renderReviews(){
 
     $('#reviews-list').innerHTML = slice.map((r,i)=>`
         <figure class="rev-card" style="--rot:${i%2 ? '1.3deg' : '-1.6deg'}">
+          ${r.meta.reply ? `<span class="rev-flag">ответ мастера</span>` : ''}
           ${mdToHtml(r.body)}
+          ${r.meta.reply ? `<div class="rev-reply"><span class="rev-reply-label">/// ${esc(r.meta.replyLabel||'ответ мастера')}</span><p>${esc(r.meta.reply)}</p></div>` : ''}
           <figcaption><span class="rev-name">${esc(r.meta.name||'Аноним')}</span>
           <span class="rev-game">${esc(r.meta.game||'')}</span></figcaption>
         </figure>`).join('');
@@ -329,6 +410,7 @@ function renderGame(id){
       <div><dt>Игроки</dt><dd>${esc(m.players)}</dd></div>
       <div><dt>Длительность</dt><dd>${esc(m.duration)}</dd></div>
       <div><dt>Стоимость</dt><dd>${esc(m.price)}</dd></div>
+      ${m.geo ? `<div><dt>География</dt><dd class="t">${esc(m.geo)}</dd></div>` : ''}
     </dl>
     ${coverHtml(m,'doc-cover')}
     <div class="doc-body">${mdToHtml(g.body)}</div>
@@ -354,4 +436,40 @@ document.addEventListener('click', e=>{
     e.preventDefault();
     const go = ()=>{ const el=document.getElementById(a.dataset.section); el && el.scrollIntoView({behavior:'smooth', block:'start'}); };
     if($('#view-home').hidden){ location.hash='#/'; setTimeout(go, 90); } else go();
+});
+
+/* ============ ЛОГО: НА ГЛАВНУЮ, В САМЫЙ ВЕРХ ============ */
+(function(){
+    const logo = $('.logo');
+    logo.addEventListener('click', e=>{
+        e.preventDefault();
+        // перезапуск анимации оборота
+        logo.classList.remove('logo-spin'); void logo.offsetWidth; logo.classList.add('logo-spin');
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const goTop = ()=> window.scrollTo({top:0, behavior: reduce ? 'auto' : 'smooth'});
+        if($('#view-home').hidden){        // если открыта страница дела — сначала домой
+            location.hash = '#/';
+            setTimeout(goTop, 90);
+        } else {
+            goTop();                          // уже на главной — просто вверх
+        }
+    });
+})();
+
+
+/* ============ FAQ: ПЛАВНОЕ РАСКРЫТИЕ ============ */
+document.addEventListener('click', e=>{
+    const sum = e.target.closest('.faq-item summary'); if(!sum) return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const item = sum.parentElement;
+    const body = item.querySelector('.faq-a'); if(!body) return;
+    e.preventDefault();
+    if(item.open){
+        const h = body.scrollHeight;
+        body.animate([{height:h+'px'},{height:'0px'}], {duration:220, easing:'ease-in'}).onfinish = ()=>{ item.open = false; };
+    }else{
+        item.open = true;
+        const h = body.scrollHeight;
+        body.animate([{height:'0px'},{height:h+'px'}], {duration:260, easing:'ease-out'});
+    }
 });

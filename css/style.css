@@ -101,6 +101,7 @@ html[data-theme="light"] .polaroid{background:#fbf9f2}
     background:transparent;border:1px solid var(--line);padding:7px 12px;cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--teal-dim);color:var(--ink)}
 .chip.active{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
+.chip.more{border-style:dashed;color:var(--teal)}
 
 /* ============ КАРТОЧКИ-ДЕЛА ============ */
 .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:26px;margin-top:34px}
@@ -170,6 +171,18 @@ html[data-theme="light"] .polaroid{background:#fbf9f2}
 .rev-card figcaption{display:flex;justify-content:space-between;gap:10px;margin-top:16px;border-top:1px dashed var(--line);padding-top:12px;font-family:var(--mono);font-size:12px}
 .rev-name{color:var(--teal);letter-spacing:.12em;text-transform:uppercase}
 .rev-game{color:var(--muted)}
+.rev-card{position:relative}
+.rev-flag{position:absolute;top:-11px;right:12px;z-index:1;
+    font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--teal);background:var(--bg);border:1px solid var(--teal);
+    outline:1px solid var(--teal);outline-offset:2px;padding:3px 9px;transform:rotate(2deg)}
+#reviews-note .section-note{margin-bottom:12px}
+#reviews-note .section-note:last-child{margin-bottom:30px}
+
+/* ============ ОТВЕТ МАСТЕРА В ОТЗЫВЕ ============ */
+.rev-reply{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.rev-reply-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal)}
+.rev-reply p{margin-top:6px;font-style:normal;font-size:14px;line-height:1.6;color:var(--muted)}
 
 /* ============ КОНТАКТЫ ============ */
 .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px}
@@ -214,6 +227,8 @@ html[data-theme="light"] .polaroid{background:#fbf9f2}
 /* ============ ПОДВАЛ ============ */
 .footer{border-top:1px solid var(--line);padding:26px 0 36px;margin-top:40px}
 .footer p{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;line-height:2.1}
+.footer a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim)}
+.footer a:hover{border-bottom-style:solid}
 
 /* ============ АДАПТИВ ============ */
 @media (max-width:960px){
@@ -269,7 +284,7 @@ html[data-theme="light"] .polaroid{background:#fbf9f2}
     border:1px solid var(--teal);outline:1px solid var(--teal);outline-offset:2px;
     padding:3px 9px;transform:rotate(2deg);
 }
-.section-note{text-wrap:balance}
+/*.section-note{text-wrap:balance}*/
 
 /* ============ ОТЗЫВЫ: ПОСТЕПЕННОЕ РАСКРЫТИЕ ============ */
 .sec-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:32px}
@@ -280,3 +295,71 @@ html[data-theme="light"] .polaroid{background:#fbf9f2}
 @keyframes rev-in{
     from{opacity:0;transform:translateY(12px) rotate(var(--rot,0deg));}
 }
+
+/* ============ АНИМАЦИЯ ЛОГО ============ */
+.logo-v{transition:transform .4s cubic-bezier(.2,.9,.3,1.3)}
+.logo:hover .logo-v{transform:rotate(0deg) scale(1.08)}   /* квадратик выпрямляется */
+.logo-text small{transition:color .25s ease}
+.logo:hover .logo-text small{color:var(--teal)}           /* подпись подсвечивается */
+.logo-spin .logo-v{animation:logo-flip .6s ease}          /* оборот при клике */
+@keyframes logo-flip{
+    0%  {transform:rotate(-4deg)}
+    45% {transform:rotate(176deg) scale(1.15)}
+    100%{transform:rotate(356deg) scale(1)}
+}
+/* ============ ГЕОГРАФИЯ ============ */
+.geo-row{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 20px}
+.geo-stamp{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--teal);border:1px solid var(--teal);outline:1px solid var(--teal);outline-offset:2px;
+    padding:7px 12px;transform:rotate(-1.5deg);background:color-mix(in srgb, var(--teal) 6%, transparent)}
+.geo-stamp:nth-child(even){transform:rotate(1deg)}
+.meta .geo{color:var(--teal)}
+
+/* ============ ПРИМЕЧАНИЕ ОБ ОПЛАТЕ ============ */
+.policy-note{margin-top:18px;max-width:860px;background:var(--panel);border:1px dashed var(--line);
+    border-left:3px solid var(--orange);padding:14px 18px;
+    font-family:var(--mono);font-size:12px;line-height:1.9;letter-spacing:.04em;color:var(--muted)}
+.policy-note::before{content:"Примечание о стоимости";display:block;color:var(--orange);letter-spacing:.14em;margin-bottom:6px}
+
+/* ============ ВСЁ ВКЛЮЧЕНО ============ */
+.included-banner{margin-top:26px;position:relative;border:1px solid var(--teal);padding:24px 24px 20px;
+    background:color-mix(in srgb, var(--teal) 6%, var(--panel))}
+.incl-stamp{position:absolute;top:-12px;left:20px;font-family:var(--mono);font-size:11px;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--teal);background:var(--bg);border:1px solid var(--teal);
+    outline:1px solid var(--teal);outline-offset:2px;padding:4px 10px;transform:rotate(-1.5deg)}
+.included-banner p{color:var(--ink);font-size:16px;line-height:1.7;margin-top:4px}
+.included-banner .tags{margin-top:14px}
+
+/* ============ FAQ ============ */
+.faq-list{max-width:880px;display:flex;flex-direction:column;gap:12px}
+.faq-item{border:1px solid var(--line);background:var(--panel);transition:border-color .2s}
+.faq-item:hover{border-color:var(--teal-dim)}
+.faq-item summary{cursor:pointer;list-style:none;position:relative;padding:16px 52px 16px 18px;
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";position:absolute;right:18px;top:50%;translate:0 -50%;
+    font-family:var(--mono);font-size:18px;color:var(--teal);transition:transform .25s}
+.faq-item[open] summary{color:var(--teal)}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-a{overflow:hidden;border-top:1px dashed var(--line)}
+.faq-a-in{padding:14px 18px 18px;color:var(--muted);font-size:15px;line-height:1.7}
+
+/* ============ ВЫДВИЖНЫЕ ФИЛЬТРЫ ============ */
+.filters-bar{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.f-count{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:10px;padding:0 6px;
+    background:var(--teal);color:var(--teal-ink);font-size:11px}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);z-index:80;background:var(--panel);
+    border-left:1px solid var(--line);box-shadow:var(--shadow);padding:22px 24px 30px;overflow-y:auto;
+    transform:translateX(105%);visibility:hidden;transition:transform .35s ease, visibility 0s linear .35s}
+.drawer.open{transform:translateX(0);visibility:visible;transition:transform .35s ease}
+.drawer-backdrop{position:fixed;inset:0;z-index:70;background:rgba(5,8,9,.55);opacity:0;pointer-events:none;transition:opacity .3s}
+.drawer-backdrop.open{opacity:1;pointer-events:auto}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;
+    border-bottom:1px dashed var(--line);padding-bottom:14px}
+.drawer-title{font-family:var(--disp);text-transform:uppercase;font-size:22px;letter-spacing:.04em}
+.drawer-title::before{content:"/// ";color:var(--teal)}
+.drawer-close{background:none;border:1px solid var(--line);color:var(--muted);width:34px;height:34px;cursor:pointer;font-size:18px;line-height:1}
+.drawer-close:hover{border-color:var(--teal);color:var(--teal)}
+.drawer-foot{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+.drawer .search{width:100%}
+body.no-scroll{overflow:hidden}

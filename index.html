@@ -35,6 +35,7 @@
     <a href="#/" data-section="about">Обо мне</a>
     <a href="#/" data-section="table">Стол</a>
     <a href="#/" data-section="reviews">Отзывы</a>
+    <a href="#/" data-section="faq">FAQ</a>
     <a href="#/" data-section="contacts">Контакты</a>
     <button id="theme-btn" class="theme-btn" aria-label="Переключить тему">☀</button>
   </nav>
@@ -48,6 +49,7 @@
           <div class="overline" id="hero-overline"></div>
           <h1 class="display" id="hero-name"></h1>
           <div class="hero-role" id="hero-role"></div>
+          <div class="geo-row" id="hero-geo"></div>
           <p class="hero-text" id="hero-text"></p>
           <div class="btn-row">
             <a class="btn" href="#/" data-section="games">Открыть каталог</a>
@@ -69,20 +71,10 @@
           <h2>Каталог игр</h2>
           <span class="sec-count" id="count">Найдено дел: 0</span>
         </div>
-        <div class="filters">
-          <input id="search" class="search" type="search" placeholder="Поиск по названию…" autocomplete="off">
-          <div class="filter-row" id="f-system"></div>
-          <div class="filter-row" id="f-format"></div>
-          <div class="filter-row">
-            <label class="f-label" for="genre">Жанр:</label>
-            <select id="genre" class="select"><option value="">Все</option></select>
-            <div class="chip-group" id="f-price">
-              <button class="chip active" data-price="">Все</button>
-              <button class="chip" data-price="бесплатно">Бесплатно</button>
-              <button class="chip" data-price="платно">Платно</button>
-            </div>
-          </div>
+        <div class="filters-bar">
+          <button class="btn ghost" id="filters-open">Фильтры<span class="f-count" id="filters-count" hidden></span></button>
         </div>
+        <p class="policy-note" id="price-note" hidden></p>
         <div class="grid-cards" id="catalog"></div>
       </div>
     </section>
@@ -113,6 +105,7 @@
       <div class="container">
         <div class="sec-head"><span class="sec-label">Раздел 04 — Протокол стола</span><h2>За столом</h2></div>
         <div class="table-cols" id="table-cols"></div>
+        <div class="included-banner" id="included" hidden></div>
       </div>
     </section>
 
@@ -123,14 +116,22 @@
           <h2>Отзывы</h2>
           <span class="sec-count" id="reviews-count"></span>
         </div>
+        <div id="reviews-note" hidden></div>
         <div class="rev-grid" id="reviews-list"></div>
         <div class="sec-foot" id="reviews-foot" hidden></div>
       </div>
     </section>
 
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="sec-head"><span class="sec-label">Раздел 06 — Вопросы из протокола</span><h2>FAQ</h2></div>
+        <div class="faq-list" id="faq-list"></div>
+      </div>
+    </section>
+
     <section class="section" id="contacts">
       <div class="container">
-        <div class="sec-head"><span class="sec-label">Раздел 06 — Каналы связи</span><h2>Контакты</h2></div>
+        <div class="sec-head"><span class="sec-label">Раздел 07 — Каналы связи</span><h2>Контакты</h2></div>
         <p class="section-note">По вопросам проведения игр, материалов и сотрудничества. Отвечаю обычно в течение дня.</p>
         <div class="contact-grid" id="contacts-list"></div>
       </div>
@@ -142,10 +143,40 @@
 
 <footer class="footer">
   <div class="container">
+    <p id="fan-line" hidden></p>
+    <p id="bug-line" hidden></p>
     <p id="license-line"></p>
     <p>© <span id="year"></span> <span id="footer-nick"></span> · собрано мастером вручную · контент редактируется через файлы — см. README.md</p>
   </div>
 </footer>
+
+<div class="drawer-backdrop" id="filters-backdrop"></div>
+<aside class="drawer" id="filters-drawer" aria-hidden="true" aria-label="Фильтры игр">
+  <div class="drawer-head">
+    <span class="drawer-title">Фильтры</span>
+    <button class="drawer-close" id="filters-close" aria-label="Закрыть фильтры">×</button>
+  </div>
+
+  <div class="filters">
+    <input id="search" class="search" type="search" placeholder="Поиск по названию…" autocomplete="off">
+    <div class="filter-row"><span class="f-label">Система:</span><div class="chip-group" id="f-system"></div></div>
+    <div class="filter-row"><span class="f-label">Формат:</span><div class="chip-group" id="f-format"></div></div>
+    <div class="filter-row"><span class="f-label">Сеттинг:</span><div class="chip-group" id="f-setting"></div></div>
+    <div class="filter-row"><span class="f-label">Теги:</span><div class="chip-group" id="f-tags"></div></div>
+    <div class="filter-row"><span class="f-label">Цена:</span>
+      <div class="chip-group" id="f-price">
+        <button class="chip active" data-price="">Все</button>
+        <button class="chip" data-price="бесплатно">Бесплатно</button>
+        <button class="chip" data-price="платно">Платно</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-foot">
+    <button class="btn" id="filters-apply">Показать дела</button>
+    <button class="btn ghost" id="filters-reset">Сбросить</button>
+  </div>
+</aside>
 
 <script src="js/app.js"></script>
 </body>
