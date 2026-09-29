@@ -426,3 +426,13 @@ body.no-scroll{overflow:hidden}
 .bn-line{margin:0 0 6px;color:var(--ink);font-size:14.5px;line-height:1.5}
 .bn-line strong{color:var(--teal)}
 .bn-desc{margin:0;color:var(--muted);font-size:13.5px;line-height:1.65}
+
+/* ============ QR ФОРМЫ ОТЗЫВОВ ============ */
+.rev-form{position:relative;width:230px;margin:36px auto 0;padding:16px 16px 14px;
+    background:#fbf9f2;color:#3c3c38;text-align:center;box-shadow:var(--shadow);transform:rotate(-1.2deg)}
+[data-theme="light"] .rev-form{border:1px solid var(--line)}
+.rev-form img{width:100%;height:auto;display:block;background:#fff;padding:8px;border:1px solid #d8d4c8}
+.rev-form p{margin:10px 0 8px;font-size:13px;line-height:1.55;color:#55554e}
+.rev-form a{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#0c8f7d;text-decoration:none;border-bottom:1px dashed #0c8f7d}
+.rev-form a:hover{border-bottom-style:solid}
