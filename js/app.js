@@ -176,6 +176,15 @@ function buildStatic(){
         bl.innerHTML=`${esc(br.text||'Нашли баг на сайте — напишите:')} <a href="${esc(br.url)}" target="_blank" rel="noopener">${esc(br.handle||br.url)}</a>`;
     } else bl.hidden=true;
     const al=$('#age-line'); al.textContent = c.siteAge ? 'Возрастная маркировка материалов сайта: ' + c.siteAge : ''; al.hidden = !c.siteAge;
+
+    const rf=c.reviewForm||{}, rfw=$('#rev-form');
+    if(rf.url){
+        rfw.hidden=false;
+        const qr=$('#rev-form-qr');
+        qr.src=rf.qr||''; qr.style.display=rf.qr?'':'none';
+        $('#rev-form-text').textContent=rf.text||'Оставьте отзыв через форму.';
+        const l=$('#rev-form-link'); l.href=rf.url; l.textContent=rf.linkLabel||'открыть форму';
+    } else rfw.hidden=true;
 }
 
 /* ============ ФИЛЬТРЫ ============ */
